@@ -875,4 +875,30 @@
 	SQL> select DNAME from DEPT
 	     where DEPTNO=(select DEPTNO from EMP where EMPNO=7900); -- by 서브쿼리 
 
-	
+	-- 부서번호가 10번인 사원 평균급여 보다 급여가 적은 사원의 이름과 급여
+	   -- ( 단, 급여가 높은 순으로 정렬 )
+	Sub> select avg(SAL) from EMP where DEPTNO=10;
+	Main> select ENAME, SAL from EMP where SAL<?;
+	SQL> select ENAME, SAL from EMP 
+	     where SAL<(select avg(SAL) from EMP where DEPTNO=10);
+	SQL> select ENAME, SAL from EMP 
+	     where SAL<(select avg(SAL) from EMP where DEPTNO=10)
+	     order by SAL desc;
+
+        --부서번호가 10번인 사원 평균급여 보다 급여가 적은 사원들의 부서별 평균 급여
+	    --( 단 10번부서는 제외할 것, 부서번호 역정렬, 급여는 반올림할 것 )
+	Sub> select avg(SAL) from EMP where DEPTNO=10;
+	Main> select DEPTNO, round(avg(SAL)) from EMP
+	      where SAL< ? 
+	      group by DEPTNO
+	      having DEPTNO != 10
+	      order by DEPTNO desc;
+        SQL> select DEPTNO, round(avg(SAL)) from EMP
+	     where SAL< (select avg(SAL) from EMP where DEPTNO=10) 
+	     group by DEPTNO
+	     having DEPTNO != 10
+	     order by DEPTNO desc; 
+
+	   -- 미션( 학생들의공간/SQL )
+	      -- 문제1+문제2 는 모범답안과 비교해 볼 것!
+	      -- 문제3 풀기 
