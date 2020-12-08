@@ -803,13 +803,76 @@
         [2] 복수행 SUB-QUERY
 	    -> SUB-QUERY의 실행결과가 '여러개의 행'을 return 하는 경우의 쿼리
 	    ( 연산자를 이용: in[=any], any, exists, all )
+  
+            <1> in 
+            -- 부서번호가 10번인 사원급여와 급여가 같은 사원의 이름과 급여를 출력
+	    Sub> select SAL from EMP where DEPTNO=10;
+	    Main> select ENAME, SAL from EMP where SAL=? 	
+            Err> select ENAME, SAL from EMP where SAL=(select SAL from EMP where DEPTNO=10);
+
+	    SQL> select ENAME, SAL from EMP 
+	         where SAL in (select SAL from EMP where DEPTNO=10);
+            SQL> select ENAME, SAL from EMP 
+	         where SAL=any(select SAL from EMP where DEPTNO=10);
+            효과> select ENAME, SAL from EMP
+	         where SAL=2450 or SAL=5000 or SAL=1300;
+	
+	    <2> all
+	    -- 급여가 가장 많은 'MANAGER'보다 급여가 같거나 많은 사원의 JOB,SAL을 출력!!
+	    Sub> select SAL from EMP where JOB='MANAGER';
+	    Main> select JOB,SAL from EMP where SAL>=?;
+	    SQL> select JOB,SAL from EMP
+	        where SAL>=(select max(SAL) from EMP where JOB='MANAGER');
+            SQL> select JOB,SAL from EMP
+	        where SAL>=all(select SAL from EMP where JOB='MANAGER');
+            효과> select JOB,SAL from EMP
+	        where SAL>=2975 and SAL>=2850 and SAL>=2450;
+
+            <3> any
+	     -- 급여가 가장 큰 'SALESMAN' 보다 급여가 작은 사원의 JOB, SAL을 출력!
+	     Sub> select SAL from EMP where JOB='SALESMAN';
+	     Main> select JOB,SAL from EMP where SAL<?;
+	     SQL> select JOB,SAL from EMP 
+	        where SAL<any(select SAL from EMP where JOB='SALESMAN');
+             효과> select JOB,SAL from EMP
+	        where SAL<1600 or SAL<1250 or SAL<1500; 
+
+            <4> exists
+	      -- '부서번호'가 10인 사원이 존재하면 모든 부서의 이름을 출력!
+	      Sub> select * from EMP where DEPTNO=10;
+              Main> select DNAME from DEPT
+	         where exists(select * from EMP where DEPTNO=10);
 
 	[3] 복수 컬럼 SUB-QUERY
 	    -> SUB-QUERY의 실행결과가 여러개의 '컬럼을 값'
-	       (AND 여러개의 행)을 리턴해 주는 쿼리	  
+	       (AND 여러개의 행)을 리턴해 주는 쿼리
+	       
+	    --'부서번호'가 30인 사원의 SAL과 COMM이 같은 사원들의 '이름'과 '부서번호' 출력! 
+	    Sub> select SAL, COMM from EMP where DEPTNO=30;
+	    Main> select ENAME, DEPTNO from EMP
+	        where (SAL, COMM) 
+		in (select SAL, COMM from EMP where DEPTNO=30); --4개 
+            비교> select ENAME, DEPTNO from EMP
+	        where (SAL, nvl(COMM,0)) 
+		in (select SAL, nvl(COMM,0) from EMP where DEPTNO=30); --6개  
 
 	[4] 상호 관련 SUB-QUERY
 	    -> MAIN-QUERY절에 사용된 테이블이 SUB-QUERY절에 다시
 	       재사용되는 경우의 서브쿼리 
 
-       
+           Sub> select avg(e1.SAL) from EMP e1, EMP e2 
+	        where e1.DEPTNO=e2.DEPTNO; --수행O
+	   Sub-Err> select avg(SAL) from EMP e2 
+	        where e1.DEPTNO=e2.DEPTNO; --수행X
+           Main> select e1.EMPNO, e1.SAL from EMP e1
+	        where SAL>(select avg(SAL) from EMP e2 
+	        where e1.DEPTNO=e2.DEPTNO);
+	  
+        cf) 연습문제
+        -- 사원번호가 7900인 사원번호와 부서이름을 출력하라
+	SQL> select e.EMPNO, d.DNAME from EMP e, DEPT d
+	     where e.DEPTNO=d.DEPTNO and e.EMPNO=7900; -- by 조인 
+	SQL> select DNAME from DEPT
+	     where DEPTNO=(select DEPTNO from EMP where EMPNO=7900); -- by 서브쿼리 
+
+	
