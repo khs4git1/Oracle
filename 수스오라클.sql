@@ -630,3 +630,17 @@
            where SAL>=2000 group by DEPTNO;
 
       -- 급여 2000 이상인 사원들의 부서별 평균급여의 반올림값 (부서번호의 오름차순 정렬)
+      SQL> select DEPTNO, round(avg(SAL)) from EMP 
+           where SAL>=2000 group by DEPTNO order by DEPTNO;
+  
+     ## 오라클 수업 깃: https://github.com/khs4git1/Oracle.git
+
+      -- 급여 2000 이상인 사원들의 부서별 평균급여의 반올림값 (급여가 높은 순 정렬)
+
+
+
+
+     
+      
+
+
