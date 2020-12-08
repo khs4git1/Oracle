@@ -744,3 +744,57 @@
         SQL> select e.ENAME||'의 매니져는 ', m.ENAME||'이다' 
 	     from EMP e join EMP m on e.MGR=m.EMPNO 
 	     where e.ENAME='JAMES'; -- join on절로
+
+
+   #1-4. 서브쿼리( Sub Query )
+    1) 설명 
+          하나의 DQL문장절에 부속된(포함된) 또 다른 SELECT문장
+          따라서, 두 번 이상 질의를 해야 얻을 수 있는 결과를 
+	  한번의 질의로 해결이 가능케하는 쿼리 
+
+    2) 용어 
+          [1] MAIN-QUERY or OUTER-QUERY 
+	  [2] SUB-QUERY or INNER-QUERY 
+
+    3) 특징 
+        [1] 괄호를 묶어야 한다. 
+	[2] 실행순서는 '대부분' SUB-QUERY가 먼저 수행되고, 
+	    MAIN-QUERY가 실행된다.
+	[3] SUB-QUERY는 MAIN-QUERY의 다음 부분에 위치된다.
+	    - SELECT/DELETE/UPDATE문장의 FROM절/WHERE절 
+	    - INSERT문장의 INTO절 
+	    - UPDATE문장의 SET절 
+        [4] SUB-QUERY는 ORDER BY절을 사용할 수 없다.
+	    (예외 : SELECT/DELETE/UPDATE문장의 FROM절 )
+
+    4) 종류
+        [1] 단일행 SUB-QUERY
+	    -> SUB-QUERY의 실행결과가 하나의 컬럼 AND 
+	      '하나의 행'만을 리턴해 주는 경우의 쿼리 
+	       즉, '하나의 데이터'를 리턴해 주는 쿼리
+            
+	    < 문제 >
+	    -- 사원번호가 7900인 사원의 부서이름 출력하시오 
+	    Join> select e.EMPNO, d.DNAME from EMP e, DEPT d  
+		  where e.DEPTNO=d.DEPTNO and e.EMPNO=7900; 
+
+	    Sub> select DEPTNO from EMP where EMPNO=7900;
+	    Main> select DNAME from DEPT where DEPTNO=?;
+	    SQL> select DNAME from DEPT 
+	         where DEPTNO=(select DEPTNO from EMP where EMPNO=7900);
+
+            -- 부서번호가 10번인 사원급여와 급여가 같은 사원의 이름과 커미션을 출력
+
+        [2] 복수행 SUB-QUERY
+	    -> SUB-QUERY의 실행결과가 '여러개의 행'을 return 하는 경우의 쿼리
+	    ( 연산자를 이용: in[=any], any, exists, all )
+
+	[3] 복수 컬럼 SUB-QUERY
+	    -> SUB-QUERY의 실행결과가 여러개의 '컬럼을 값'
+	       (AND 여러개의 행)을 리턴해 주는 쿼리	  
+
+	[4] 상호 관련 SUB-QUERY
+	    -> MAIN-QUERY절에 사용된 테이블이 SUB-QUERY절에 다시
+	       재사용되는 경우의 서브쿼리 
+
+       
