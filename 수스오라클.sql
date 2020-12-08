@@ -671,6 +671,76 @@
            group by DEPTNO, JOB 
 	   order by DEPTNO desc, JOB desc;
      
-      
+      < 일반화 >
+      [1] 순서 ( SF - WGHO )
+         select -> from -> where -> group by -> having -> order by 
+      [2] where 절에는 그룹함수를 사용 불가
+      [3] having 절에서는 alias를 사용할 수 없음
+
+     ------------- 문제2 ---------------------------
+     탐색기: ftp://106.240.16.165  ( student / java )
 
 
+   #1-3. 조인( Join )
+   1) 설명 
+         하나의 테이블로는 원하는 컬럼정보를 참조할 수 
+	 없는 경우 관련된 테이블을 '논리적으로 결합'하여
+	 원하는 컬럼정보를 참조하는 방법을 '조인'이라 한다.
+
+   2) 조건 
+         논리적으로 결합되는 2개 이상의 테이블에는 반드시 
+	 '공통컬럼'이 존재해야하며 이 '공통 컬럼'은 
+	 동일한 데이터 타입과 공통된 데이터를 포함해야 한다.
+
+   3) 일반적인 조인예
+      <1> NATURAL 조인 ( EQUI 조인 )
+      select EMP.EMPNO, DEPT.DNAME from EMP, DEPT where EMP.DEPTNO=DEPT.DEPTNO;--형태1
+      select e.EMPNO, d.DNAME from EMP e, DEPT d where e.DEPTNO=d.DEPTNO;--형태1
+      select e.EMPNO, d.DNAME from EMP e join DEPT d on e.DEPTNO=d.DEPTNO;--형태2
+      select EMP.EMPNO, DEPT.DNAME from EMP join DEPT using(DEPTNO);--형태3
+      select EMPNO, DNAME from EMP natural join DEPT; --형태4
+
+ 
+      < 문제 >
+      -- 사원번호가 7900인 사원의 부서이름 출력하시오 
+      SQL> select EMP.EMPNO, DEPT.DNAME from EMP, DEPT 
+          where EMP.DEPTNO=DEPT.DEPTNO and EMP.EMPNO=7900; -- 형태1  
+      SQL> select e.EMPNO, d.DNAME from EMP e, DEPT d  
+          where e.DEPTNO=d.DEPTNO and e.EMPNO=7900; -- 형태1
+      SQL> select e.EMPNO, d.DNAME from EMP e join DEPT d 
+          on e.DEPTNO=d.DEPTNO and e.EMPNO=7900; -- 형태2
+      SQL> select e.EMPNO, d.DNAME from EMP e join DEPT d 
+          on e.DEPTNO=d.DEPTNO where e.EMPNO=7900; -- 형태2
+      SQL> select EMP.EMPNO, DEPT.DNAME from EMP join DEPT using(DEPTNO)
+          where EMP.EMPNO=7900; --형태3
+      SQL> select EMPNO, DNAME from EMP natural join DEPT
+          where EMPNO=7900;
+
+       < 일반화: DQL의 배치순서와 실행순서 >
+        - select XX         --> 6
+        - from XX           --> 1 
+        - (join XX)         --> 2 
+        - where XX          --> 3 
+        - group by XX       --> 4 
+        - having XX         --> 5
+        - order by XX       --> 7
+  
+     <2> SELF 조인
+        < 문제 >
+        -- ex) JAMES의 매니져는 BLAKE이다  ( 13명의 MGR를 출력하시오 )
+
+	유민> SELECT e1.ename ||'의 매니저는 ' "사원", e2.ename || '입니다.' "매니저" 
+	     FROM emp e1,emp e2 
+	     WHERE e1.mgr=e2.empno AND e2.empno= e1.mgr;
+	동오> select concat(e.ENAME,'의 매니저는') 사원이름,concat(e2.ENAME,'이다') 담당매니저
+             from EMP e, EMP e2 where e.MGR=e2.EMPNO;
+	종범> select e.ename||'의 매니져는 ', f.ename||'이다' from emp e, emp f 
+             where e.mgr=f.empno and f.empno= e.mgr;
+
+	SQL> select e.ENAME||'의 매니져는 ', m.ENAME||'이다' 
+	     from EMP e, EMP m where e.MGR=m.EMPNO;
+	SQL> select e.ENAME||'의 매니져는 ', m.ENAME||'이다' 
+	     from EMP e, EMP m where e.MGR=m.EMPNO and e.ENAME='JAMES';
+        SQL> select e.ENAME||'의 매니져는 ', m.ENAME||'이다' 
+	     from EMP e join EMP m on e.MGR=m.EMPNO 
+	     where e.ENAME='JAMES'; -- join on절로
