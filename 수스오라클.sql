@@ -769,7 +769,7 @@
 
     4) 종류
         [1] 단일행 SUB-QUERY
-	    -> SUB-QUERY의 실행결과가 하나의 컬럼 AND 
+	    -> SUB-QUERY의 실행결과가 '하나의 컬럼' AND 
 	      '하나의 행'만을 리턴해 주는 경우의 쿼리 
 	       즉, '하나의 데이터'를 리턴해 주는 쿼리
             
@@ -784,6 +784,21 @@
 	         where DEPTNO=(select DEPTNO from EMP where EMPNO=7900);
 
             -- 부서번호가 10번인 사원급여와 급여가 같은 사원의 이름과 커미션을 출력
+	    Sub> select SAL from EMP where DEPTNO=10;
+	    Main> select ENAME, COMM from EMP where SAL=?
+	    Err> select ENAME, COMM from EMP 
+	         where SAL=(select SAL from EMP where DEPTNO=10); --복수행
+		 
+            Sub> select SAL, COMM from EMP where EMPNO=7369;
+	    Main> select ENAME, SAL, COMM from EMP where SAL=?;
+	    Err> select ENAME, SAL, COMM from EMP 
+	       where SAL=(select SAL, COMM from EMP where EMPNO=7369);--복수컬럼
+
+	    -- 평균급여보다 많은 받는 사원의 이름과 급여 출력!
+	    Err> select ENAME, SAL from EMP where SAL>avg(SAL);	
+	    Sub> select avg(SAL) from EMP;
+	    Main> select ENAME, SAL from EMP where SAL>?
+	    SQL> select ENAME, SAL from EMP where SAL>(select avg(SAL) from EMP);
 
         [2] 복수행 SUB-QUERY
 	    -> SUB-QUERY의 실행결과가 '여러개의 행'을 return 하는 경우의 쿼리
