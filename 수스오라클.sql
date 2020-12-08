@@ -640,12 +640,36 @@
            where SAL>=2000 group by DEPTNO order by round(avg(SAL)) desc;
       SQL> select DEPTNO, round(avg(SAL)) aa from EMP
            where SAL>=2000 group by DEPTNO order by aa desc;
-      SQL> select DEPTNO, round(avg(SAL)) aa from EMP
-           where SAL>=2000 group by DEPTNO order by aa desc;
+      SQL> select DEPTNO, round(avg(SAL)) from EMP
+           where SAL>=2000 group by DEPTNO order by 2 desc;
 
+      --급여 1000이상인 사원들의 부서별 평균급여의 반올림값을 부서번호로 내림차순 정렬하라
+	   -- (단, 부서별 평균급여가 2000 이상인 값만 출력!)
+      유민> SELECT deptno, round(AVG(sal))  "평균급여" FROM emp 
+          WHERE sal >=1000  
+	  GROUP BY deptno 
+	  HAVING round(AVG(sal)) >= 2000 
+	  ORDER BY 1 DESC;
 
+      SQL> select DEPTNO, round(avg(SAL)) from EMP
+           where SAL>=1000
+	   group by DEPTNO
+	   having round(avg(SAL))>=2000
+	   order by DEPTNO desc;
+   
+      Err> select DEPTNO, round(avg(SAL)) aa from EMP
+           where SAL>=1000
+	   group by DEPTNO
+	   having aa>=2000
+	   order by DEPTNO desc;
 
+	  -- #주의: having 절에서는 alias를 사용할 수 없음 
 
+      --각 부서별 같은 업무를 하는 사원의 인원수를 구하여 부서번호, 업무명, 인원수를 출력하라
+	 --(단, 부서번호과 업무명으로 각각 내림차순 정렬!)
+      SQL> select DEPTNO, JOB, count(EMPNO) from EMP
+           group by DEPTNO, JOB 
+	   order by DEPTNO desc, JOB desc;
      
       
 
