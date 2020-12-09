@@ -1,4 +1,4 @@
-select * from tab;
+--select * from tab;
 
 drop table EMP2;
 drop table DEPT2;
@@ -20,7 +20,8 @@ create table EMP2(
     COMM NUMBER(7,2), 
     DEPTNO NUMBER(2)
 );
-alter table EMP2 add constraint FK_DEPTNO2 foreign key(DEPTNO) references DEPT2(DEPTNO) on delete cascade;
+alter table EMP2 add constraint FK_DEPTNO2 foreign key(DEPTNO) references DEPT2(DEPTNO);
+ --on delete cascade;
 
 insert into DEPT2 select * from DEPT;
 insert into EMP2 select * from EMP;

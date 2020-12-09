@@ -906,3 +906,83 @@
 5. DML ( Data Manipulation Language )
    (1) 설명 
        테이블내의 데이터를 '입력', '수정', '삭제' 하게 하는 SQL
+
+       cf) 우선 테이블을 복사하자 ( copy1.sql )
+
+   (2) 종류 
+       1) insert 문 
+          SQL> insert into DEPT2 values(50, '회계부', '서울');
+          SQL> insert into EMP2 
+	       values(8000, '박서하', '개발자', 7839, SYSDATE, 4000, null, 50);
+	  SQL> select * from EMP2 where EMPNO>=8000;
+	  SQL> insert into EMP2(EMPNO, ENAME) values(9000, '허유민'); 
+          Err> insert into EMP2(EMPNO, ENAME) values(9000, '성진희');
+
+       2) update 문
+          SQL> update EMP2 set ENAME='이소담', SAL=6000 where EMPNO=9000;
+	  SQL> update EMP2 set EMPNO=9999 where EMPNO=9000; --PK컬럼변경(O)
+	  Err> update EMP2 set EMPNO=8000 where EMPNO=9999; --8000이미존재
+	  SQL> update EMP2 set DEPTNO=50 where EMPNO=9999; --가능 
+          Err> update EMP2 set DEPTNO=70 where EMPNO=9999; --불가(70번부서는 존재X)
+
+       3) delete 문
+          SQL> delete from EMP2 where EMPNO=9999;  
+	  SQL> delete from DEPT2 where DEPTNO=50; -- on delete cascade; 옵션에서만 가능
+	  Err> delete from DEPT2 where DEPTNO=20; --불가: 바라보는 자식 데이터가 존재하기 때문에
+	  SQL> delete from DEPT2 where DEPTNO=40; --가능
+
+6. TCL( Transaction Control Language )
+   (1) 설명 
+      DML(insert, update, delete)문이 실행되어 DBMS에 '저장'되거나, 
+      '되돌리기' 위해서 실행해야 하는 SQL문 
+
+   (2) Transaction 
+     1) 정의 
+        분리되서는 안될 (논리적)'작업 단위' 
+     
+     2) 시작 
+        <1> DBMS에 처음 접속했을 때 
+	<2> 하나 or 여러개의 DML문을 실행한 후 commit 또는 
+	    rollback 을 수행한 직후
+
+     3) 끝 
+        <1> commit 또는 rollback 실행되는 순간 
+
+	     예외) rollback to a; 
+	  
+	<2> DDL 이나 DCL 문이 실행되는 순간
+	    세션1> 
+	       SQL> insert into DEPT2 values(1, 'a', 'b');  --DML 
+	       SQL> update DEPT2 set DNAME='A' where DEPTNO=1; --DML 
+	       SQL> create table AA(no number); --DDL 
+
+	    세션2>
+	       SQL> select * from DEPT2;
+
+	<3> DB가 (정상/비정상) 종료될 때
+	    세션1> 
+	       SQL> delete from DEPT2 where DEPTNO=1;
+	       SQL> 왼쪽 상단의 X버튼 클릭해서 세션종료 -- 비정상종료 
+	    세션2> 
+	       SQL> select * from DEPT2; -- commit 되지 않음 
+	       
+	    세션1> 
+	       SQL> delete from DEPT2 where DEPTNO=1;
+	       SQL> exit; 또는 quit; --정상종료  
+	    세션2> 
+	       SQL> select * from DEPT2; -- commit 되었음 
+	    
+            세션1> DML 작업중 
+	       SQL> insert into DEPT2 values(1, '가', '나');
+            세션2> DBMS 종료 
+	       SQL> sqlplus system/java1019 as sysdba
+	       SQL> shutdown immediate; --DB서비스 종료 
+	       SQL> startup; --DB서비스 시작 
+	    세션3> 
+	       SQL> select * from DEPT2; -- commit 되지 않음( rollback )
+	       
+	<4> 작업중인 Connection(세션)을 끊을 때
+	    세션1> 
+	       SQL> insert into DEPT2 values(1, '가', '나');
+	       SQL> conn system/java1019
+	    세션2> SQL> select * from DEPT2; -- commit 되었음  
