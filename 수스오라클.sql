@@ -985,4 +985,50 @@
 	    세션1> 
 	       SQL> insert into DEPT2 values(1, '가', '나');
 	       SQL> conn system/java1019
-	    세션2> SQL> select * from DEPT2; -- commit 되었음  
+	    세션2> SQL> select * from DEPT2; -- commit 되었음 
+	    
+  (3) TCL의 종류 
+     1) commit 
+         DML문의 결과를 영구적으로 DBMS에 반영하는 SQL문 
+
+     2) rollback
+         DML문의 결과를 (이전 Transaction 까지) 취소하는 SQL
+
+     3) savepoint 
+        트랜젝션을 구성하는 DML의 한 지점을 표시하는 저장점 
+
+        세션1> 
+	   SQL> insert into DEPT2 values(1, 'a1', 'b1');
+	   SQL> insert into DEPT2 values(2, 'a2', 'b2');
+	   SQL> savepoint a;
+	   SQL> insert into DEPT2 values(3, 'a3', 'b3');
+	   SQL> savepoint b;
+	   SQL> insert into DEPT2 values(4, 'a4', 'b4');
+	   SQL> rollback to a;
+	   Err> rollback to b; -- 안됨( 이미 늦음 )
+	  
+	세션2> 
+	   SQL> select * from DEPT2; -- 1과 2번만 확인됨 
+
+  (4) TCL 관련 특성
+     1) READ CONSISTENCY (읽기 일관성 - '해당 row'에 대해서)
+        어떤 사용자가 변경 중인 행을 '다른 사용자'가 변경 할 수 없게 하는 기술로써 
+	변경 중인 사용자에 의해 commit 이나 rollback 이 실행된 후 변경가능한 특성
+
+	<예>
+	세션1> update DEPT2 set DNAME='가' where DEPTNO=1;
+	세션2> update DEPT2 set DNAME='나' where DEPTNO=1; --보류 
+	세션1> commit; 또는 rollback;
+	세션2> 1 행이 갱신되었습니다
+
+
+     2) LOCK (잠금현상 - '해당 table'에 대해서)
+
+       <예>
+        세션1> update DEPT2 set DNAME='개발부', LOC='경기'; -- 테이블 전체 lock 
+	세션2> update DEPT2 set LOC='서울' where DEPTNO=1; -- 보류 
+
+	cf) lock 해제 방법 
+	   -> commit; 또는 rollback;
+
+7. DDL ( Data Definition Language )
