@@ -1096,7 +1096,26 @@
 	      purge table DEPT2;  
 
        4) rename : 객체이름 변경할 때 
+           SQL> rename DDLTEST to DDLTEST2;
+	   SQL> select * from tab;
 
        5) comment : 객체에게 주석을 부여할 때 
+          <1> 테이블 주석
+	     SQL> comment on table DDLTEST2 is 'DDL테스트용 테이블';
+	     SQL> desc user_tab_comments; -- 데이터 딕셔너리 
+	     SQL> select COMMENTS from user_tab_comments where TABLE_NAME='DDLTEST2';
+
+	  <2> 컬럼 주석 
+	     SQL> comment on column DDLTEST2.NAME is '회원이름';
+	     SQL> desc user_col_comments; -- 데이터 딕셔너리
+	     SQL> select COMMENTS from user_col_comments where TABLE_NAME='DDLTEST2';
 
        6) truncate : 모든 행을 잘라낼 때 
+          SQL> truncate table DDLTEST;
+	  SQL> select * from DDLTEST;
+
+	  cf) delete문과의 차이점 
+	    - 되돌릴 수 없음 
+	    - where절을 사용할 수 없음 
+
+
