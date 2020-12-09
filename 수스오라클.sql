@@ -1032,3 +1032,71 @@
 	   -> commit; 또는 rollback;
 
 7. DDL ( Data Definition Language )
+   (1) 설명 
+      데이터베이스 내의 객체(Object)를 '생성'하고 '변경'하고, '삭제'하기 위해서 
+      사용되는 SQL문
+
+   (2) 객체(Object)
+       1) table 
+       2) index 
+       3) view 
+       4) sequence 
+       5) synonym
+       6) session ( 오라클로 접근하는 하나의 인터페이스[접근통로] )
+       7) user 
+          ... 
+
+   (3) DDL 종류 
+       1) create : 객체를 생성할 때 
+           SQL> create table DDLTEST(
+	           NO number(4) primary key, 
+                   NAME varchar2(10), 
+		   ADDR varchar2(20)
+	        );
+
+       2) alter : 객체를 변경할 때 
+          ( 옵션: add, add constraint, modify, set unused column, drop column, 
+	        rename column, drop constraint, disable constraint, enable constraint )
+          <1> add 
+	     SQL> insert into DDLTEST values(1000, '가', '나');
+	     SQL> insert into DDLTEST values(2000, '다', '라');
+	     SQL> alter table DDLTEST add(TEL varchar2(20));
+	     SQL> insert into DDLTEST values(3000, '마', '바', '사');
+	     SQL> insert into DDLTEST values(4000, '아', '자', '차');
+	     SQL> select * from DDLTEST;
+
+	  <2> modify 
+	     SQL> alter table DDLTEST modify(
+		      NAME varchar2(15), ADDR varchar2(25)
+	          );
+             SQL> desc DDLTEST
+
+	  <3> drop column 
+	     SQL> alter table DDLTEST drop column NO;  --PK컬럼도 삭제 가능 
+	     SQL> desc DDLTEST
+ 
+             제약조건확인> select CONSTRAINT_NAME, CONSTRAINT_TYPE 
+	        from user_constraints where TABLE_NAME='DDLTEST';
+
+       3) drop : 객체를 삭제할 때 
+            SQL> drop table DDLTEST;
+	    SQL> show recyclebin;
+	    SQL> purge recyclebin;
+
+	    cf) 오라클 휴지통 (recyclebin)
+	    - 테이블 조회 
+	      show recyclebin;
+	    - 비우기 
+              purge recyclebin;
+	    - 복원 
+	      flashback table EMP2 to before drop;
+	    - 휴지통에 남기지않고 바로삭제 
+	      drop table EMP2 purge; 
+	    - 특정 테이블만 비우기 
+	      purge table DEPT2;  
+
+       4) rename : 객체이름 변경할 때 
+
+       5) comment : 객체에게 주석을 부여할 때 
+
+       6) truncate : 모든 행을 잘라낼 때 
