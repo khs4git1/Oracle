@@ -1308,9 +1308,12 @@
          -> 하나의 제약조건을 부여할 때 사용하며 
 	    '5가지'를 모두 부여할 수 있음 
 
-	  ex) const1.sql (이름X), const2.sql(이름O) 
+	  ex) const1.sql(이름X), const2.sql(이름O) 
 	 
 
       2) TABLE-LEVEL 
          -> 하나의 이상의 컬럼에 여러개의 제약조건을 부여할 때 
 	    사용함 ( not null 불가 )
+	  
+	 ex) const3.sql(이름X), const4.sql(이름O), const5.sql
+
