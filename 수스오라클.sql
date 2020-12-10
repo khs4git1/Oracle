@@ -1377,7 +1377,7 @@
 	  but, T2는 데이터가 있으면 drop 안됨 
 
 12. 뷰 ( VIEW )
-    실제로 존재하는 것이 아닌 가상 테이블 
+    실제로 존재하는 것이 아닌 논리적인 '가상 테이블' 
     view를 사용하려면 일단 권한(create view) 필요 
 
    (1) 설명
@@ -1390,4 +1390,75 @@
       2) 복잡하며 자주 사용되는 질의 SQL문을 보다 쉽고 '간단'하게 사용해야 하는 경우 
 
    (3) 사용 단계 
-      
+      1) VIEW 생성 권한을 scott 계정에 부여 
+         SQL> conn system/java1019
+	 SQL> grant CREATE VIEW to SCOTT; -- oracle 10g부터 
+   
+      2) VIEW 생성 
+	 SQL> create or replace view VIEW1 as	
+              select DEPTNO "번호", round(avg(SAL)) "반올림" from EMP 
+	      where SAL>=1000 
+	      group by DEPTNO 
+	      having round(avg(SAL))>=2000 
+	      order by DEPTNO desc;
+
+      3) VIEW 사용 
+         SQL> select * from VIEW1;
+	 SQL> desc VIEW1;
+	 SQL> select 번호 from VIEW1;
+
+	 -- 미션: 매번 복잡한 쿼리 날리기 귀찮다 해결하라!!
+
+   (4) 특징 
+      1) VIEW 안 데이터의 물리적인 저장공간은 따로 가지지 않는다.
+         -> 이유 : 테이블 안의 데이터를 '참조만' 하고 있기 때문 
+      2) 테이블을 기초로 하는 '가상(논리)' 테이블이다.
+      3) 하나 이상의 테이블로 만들어진다.
+      4) 뷰를 access 하면 관련된 테이블도 간접적으로 access 된다.
+      5) 테이블에서 선택된 컬럼정보만 참조할 수 있다.('보안')
+      6) 복잡한 조인(JOIN)질의를 '간단', 명료하게 실행할 수 있다.
+      7) 미리 '튜닝된 SQL문'을 사용하여 성능을 향상시킬 수 있다.
+      8) DB 테이블 변경 될 때 
+         응용프로그램(JAVA)에 대한 수정이 용이(유지 보수가 좋다.)
+	 즉, Language Part 에서 code 수정이 필요없다.( SM 관점 )
+      9) 다른 세션에서도 동일하게 적용된다. ( DBMS에 저장된다. )  
+
+  (5) 핸들링 ( handling )
+      1) 생성
+          <1> 틀 
+	    create or replace [FORCE|NOFORCE] view명 
+	      ( 컬럼별칭1,  컬럼별칭2, ... , n)
+	    as 
+	    select 문 
+
+	  <2> 옵션 설명 
+	    - replace : 이미 존재하는 뷰이름이라면 '덮어쓴다'
+	    - force : 관련 테이블의 존재 여부에 관계없이 뷰 생성 
+	    - noforce : 관련 테이블이 존재할 때만 생성 가능 
+	    - with check option : 제약 조건을 설정 
+	    - with read only : DML작업을 할 수 없다
+
+       2) 검색 
+          SQL> select * from tab; --VIEW도 확인 가능
+	  SQL> select view_name from user_views;
+
+       3) 변경 (덮어쓰기)
+          SQL> create or replace view VIEW1(na, dn, lo)
+	       as 
+	       select e.NAME, d.DNAME, d.LOC from CONST_DEPT d, CONST_EMP e
+	       where e.DEPTNO=d.DEPTNO
+	       with read only;
+          SQL> select * from VIEW1;
+
+        4) 삭제 
+	  SQL> drop view VIEW1;
+	  SQL> select view_name from user_views;
+
+   (6) 종류 
+      1) 단일(SIMPLE) 뷰
+         -> '하나의 테이블'로 생성되는 뷰 
+ 
+      2) 복합(COMPLEX) 뷰 
+         -> '2개 이상의 테이블'로 생성되는 뷰 
+
+12. SEQUENCE ( 일련번호 ) 
