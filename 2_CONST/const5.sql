@@ -18,14 +18,12 @@ create table CONST_EMP(
    ADDR varchar2(6),
    JUMIN char(13) constraint CONST_EMP_JNN not null, 
    RDATE date default SYSDATE, 
-   DEPTNO number(2), 
-   constraint CONST_EMP_PK primary key(NO), 
-   constraint CONST_EMP_CK check(ADDR in('서울','부산')), 
-   constraint CONST_EMP_UQ unique(JUMIN), 
-   constraint CONST_EMP_FK foreign key(DEPTNO) references CONST_DEPT(DEPTNO) 
+   DEPTNO number(2)
 );
---alter 로 변경하시오
-
+alter table CONST_EMP add constraint CONST_EMP_PK primary key(NO); 
+alter table CONST_EMP add constraint CONST_EMP_CK check(ADDR in('서울','부산'));
+alter table CONST_EMP add constraint CONST_EMP_UQ unique(JUMIN);
+alter table CONST_EMP add constraint CONST_EMP_FK foreign key(DEPTNO) references CONST_DEPT(DEPTNO);
 
 -- 2) 제약조건 확인  
 insert into CONST_DEPT(DEPTNO, LOC) values(10, '1');

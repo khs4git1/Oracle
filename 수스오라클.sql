@@ -1315,5 +1315,79 @@
          -> 하나의 이상의 컬럼에 여러개의 제약조건을 부여할 때 
 	    사용함 ( not null 불가 )
 	  
-	 ex) const3.sql(이름X), const4.sql(이름O), const5.sql
+	 ex) const3.sql(이름X), const4.sql(이름O), const5.sql(이름O, 테이블밖)
 
+
+       cf) 개인적인 생각 
+         - const 1~5 중 간단하고 가독성이 좋은 것은 2번을 선호 
+	 - 제약조건 수정하려면 삭제하고 다시 만들어야 함 
+	 - disable constraint, enable constraint 은 비추천(무결성이 깨지는 편법)
+	 - 5가지 패턴을 익숙하게 하면 Good! 
+
+11. 임시 테이블 ( TEMPORARY TABLE ) 
+   (1) 설명 
+       개발자가 DML(insert, update, delete)문을 실행한 후 
+       트랜젝션을 종료(commit) 하더라도 변경된 데이터들이 
+       DB 테이블에 저장되지 않는 테이블.
+       즉, 잠시 데이터를 저장하는 '메모리상의 일시적 공간'
+
+   (2) 데이터를 유지하는 방법 
+      1) ON COMMIT DELETE ROWS ( 유효범위: Transaction )
+         -> commit 하는 순간에 row 삭제 tables은 존재하지만 '데이터는 사라진다'
+
+         SQL> create GLOBAL TEMPORARY table T1(
+	       NO number, 
+	       NAME varchar2(10)) ON COMMIT DELETE ROWS; 
+	 SQL> select * from tab;
+	 SQL> insert into T1 values(10, '홍길동');
+	 SQL> insert into T1 values(20, '이순신');
+	 SQL> select * from T1;
+	 SQL> update T1 set NAME='박서하' where NO=20;
+	 SQL> select * from T1;
+	 SQL> commit; 
+         SQL> select * from T1; -- 데이터가 없음 
+
+
+      2) ON COMMIT PRESERVE ROWS ( 유효범위: Session )
+         -> commit 하는 순간에 row 보존 ( session이 종료되면 사라진다 )
+
+         <세션1>
+	 SQL> create GLOBAL TEMPORARY table T2(
+	       NO number, 
+	       NAME varchar2(10)) ON COMMIT PRESERVE ROWS;
+	 SQL> insert into T2 values(10, '홍길동');
+	 SQL> insert into T2 values(20, '이순신');
+	 SQL> commit; 
+	 SQL> select * from T2; -- rows 안보임
+
+	 <세션2>
+	 SQL> select * from T2; -- rows 안보임 
+	 
+   (3) 장점 
+       일시적으로 필요한 데이터를 저장할 수 있다. 
+       즉, '어떤 시점'을 기준으로 데이터가 '자동 삭제'되기 때문에 
+       DB의 resource 를 절약할 수 있다.
+       
+       cf1) 임시 테이블 삭제 
+          SQL> drop table T1;
+	  SQL> drop table T2;
+
+       cf2) 삭제시 
+          T1은 데이터가 있어도 drop 됨
+	  but, T2는 데이터가 있으면 drop 안됨 
+
+12. 뷰 ( VIEW )
+    실제로 존재하는 것이 아닌 가상 테이블 
+    view를 사용하려면 일단 권한(create view) 필요 
+
+   (1) 설명
+      뷰는 테이블에 대한 '가상테이블'로써 테이블이 존재하지 않으면 뷰도 존재할 수 없음.
+      뷰는 테이블처럼 데이터를 직접 소유하지 않고 '검색'시에만 정의된 뷰를 
+      '틀'에 맞게 보여줌  
+      
+   (2) 사용 이유
+      1) 기본 테이블에 대한 '보안기능'을 설정해야 하는 경우 
+      2) 복잡하며 자주 사용되는 질의 SQL문을 보다 쉽고 '간단'하게 사용해야 하는 경우 
+
+   (3) 사용 단계 
+      
