@@ -1118,4 +1118,199 @@
 	    - 되돌릴 수 없음 
 	    - where절을 사용할 수 없음 
 
+8. Data Dictionary  
+   (1) 설명 
+      Oracle 의 테이블은 '2가지' 종류가 있다. 
+      첫번째, DB생성할 때 기본적으로 만들어지는 '자료사전테이블' 
+      두번째, User가 데이터를 저장하고 관리하기 위한 '사용자정의테이블'
+      전자가 Data Dictionary 테이블이다.
 
+   (2) 종류 
+      1) DBA_XXX : DB전체의 관련정보 저장 테이블 
+      2) ALL_XXX : 자신이 볼 수 있는 Object 정보 테이블 
+      3) USER_XXX : 자신이 생성한 Object 정보 테이블 
+      4) X$_XXX : DB의 성능 분석/통계 정보 테이블 ( DB튜닝시 수정함 )
+      5) V$_XXX : X$_XXX 의 VIEW ( 성능 참조 )
+
+      <예1>
+      SQL> select * from dictionary;
+      SQL> select * from dict_columns;
+
+         cf) Ctl + C : 명령실행 정지 
+
+      <예2> user_ (*****)
+      SQL> select * from user_tables;
+      SQL> desc user_tables;
+      SQL> select TABLE_NAME from user_tables;
+      SQL> select * from tab; --위와 비교 
+
+      SQL> desc user_indexes
+      SQL> select INDEX_NAME, INDEX_TYPE, TABLE_NAME 
+           from user_indexes;
+      
+      SQL> desc user_constraints
+      SQL> select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME 
+           from user_constraints;
+
+      SQL> desc user_views
+      SQL> select VIEW_NAME, TEXT from user_views;
+
+      cf) 
+      create or replace view VIEW1 as
+          select DEPTNO "번호", round(avg(SAL)) "반올림" from EMP 
+	  where SAL>=1000 
+	  group by DEPTNO 
+	  having round(avg(SAL))>=2000 
+	  order by DEPTNO desc;
+
+     SQL> select * from user_tab_comments;
+     SQL> select * from user_col_comments;
+
+     <예3> all_
+     SQL> select * from all_tables;
+     SQL> desc all_tables
+
+     <예4> dba_
+     SQL> select * from dba_tables; --없음 
+     SQL> conn system/java1019
+     SQL> select * from dba_tables; 
+
+9. Data Type ( 형 == Type )
+  (1) 설명 
+     Oracle에서 제공하는 데이터 타입 
+
+  (2) 종류
+     1) 스칼라(Scalar) 타입
+        cf) Scalar: 실수로 표시할 수 있는 수량 
+
+	<1> 하나의 데이터 타입컬럼에 
+	   오직, '하나의 데이터'만 저장할 수 있는 타입 
+	<2> '문자/숫자/날짜' 데이터를 저장 
+	<3> 종류 
+	   1> NUMBER ( -38 ~ +38 자리수 )
+	   2> BINARY_INTEGER 
+	      ( -2147483648 ~ 2147483647 ) == (-2^31 ~ 2^31-1)
+	   3> CHAR(0~255=0~2^8-1), NCHAR 
+	      - CHAR(10) -> 나머지 공간을 SPACE 로 채움 
+	      - NCHAR(10) -> 다양한 언어의 문자값을 저장 
+           4> VARCHAR, VARCHAR2(4000), NVARCHAR2(4000)
+	      - VARCHAR2(10) -> 필요한 공간만 채움 
+	      - NVARCHAR2(10) -> 다양한 언어의 문자값을 저장
+	   5> BLOB, LONG ROW, CLOB, LONG
+	      - BLOB -> 바이너리 데이터를 4G
+	      - LONG ROW -> 바이너리 데이터를 2G
+	      - CLOB -> 문자 데이터를 4G
+	      - LONG -> 문자 데이터를 2G
+           6> DATE ( 초단위 데이터 저장 )
+	   7> TIMESTAMP ( 마이크로초 저장 )
+	      - TIMESTAMP WITH TIME ZONE 
+	      - TIMESTAMP WITH LOCAL ZONE
+	      - INTERVAL YEAR TO MONTH 
+
+	    cf1) java.sql.Timestamp 를 이용 
+	    cf2) '1/10^6'초까지 저장은 가능하나 
+	       컴퓨터에서 생성할 수 있는 유효한 시간은 
+	       '1/10^3' 초이므로 실제 저장되는 시간은 
+	       '1/1000' 초 단위임 
+	   8> BOOLEAN ( true / false 저장 )
+	    
+     2) 모음(Collection) 타입 
+        <1> 하나의 데이터 타입 컬럼에 
+	   '여러개의 데이터(배열/테이블)'를 저장할 수 있는 타입 
+	<2> 배열/테이블 데이터를 저장 
+	<3> 종류 
+	    1> VARRAY
+	    2> NESTED TABLE 
+
+  (3) 시간 관련 함수 
+     1) CURRENT_DATE 함수 ( SYSDATE 유사 )
+
+        cf) 시간 포멧 수정 
+	SQL> alter session set 
+	     NLS_DATE_FORMAT='YYYY-MM-DD AM HH:MI:SS DAY';
+	SQL> alter session set NLS_LANGUAGE='ENGLISH';
+    
+     2) CURRENT_TIMESTAMP 함수 (*****)
+        SQL> select CURRENT_TIMESTAMP from DUAL;
+	SQL> alter session set TIME_ZONE='-10:00'; 
+	SQL> select CURRENT_TIMESTAMP from DUAL;
+	SQL> alter session set TIME_ZONE='00:00'; --영국표준시간 
+	SQL> select CURRENT_TIMESTAMP from DUAL;
+          
+     3) LOCALTIMESTAMP 함수 
+        SQL> select CURRENT_TIMESTAMP, LOCALTIMESTAMP from dual;
+
+	cf) TST테이블 
+	create table TST(
+	   NO number, 
+	   RDATE date, 
+	   TS timestamp);
+	insert into TST values(10, SYSDATE, CURRENT_TIMESTAMP);
+
+   (4) ROWID 와 ROWNUM 컬럼 (*****)
+      1) 설명 
+         oracle 에서 테이블을 생성하면 기본적으로 제공되는 컬럼 
+
+      2) 종류 
+         1> ROWID
+	    -> ROW 의 고유 ID ( 중간에 row 수정/삭제시 불변 )
+	 2> ROWNUM
+	    -> 행의 INDEX (중간에 row 삭제시 변함 )
+
+	    SQL> select count(*) from DEPT;
+	    SQL> select count(PK컬럼) from DEPT;
+	    SQL> select max(ROWNUM) from DEPT;
+
+10. CONSTRAINT ( ***** )
+    (1) 설명 
+        테이블의 해당 컬럼에 '원치않은 데이터가 입력/변경/삭제 되는 것을 방지'
+	하기위해 테이블 생성(create)시 또는 변경(alter)시 설정하는 조건 
+
+        cf) 제약 조건명(constraint의 변수명)을 개발자가 직접 
+	   부여하면 추후 해당 constraint 관리가 용이 
+
+    (2)  종류 
+       1) PRIMARY KEY (식별키) [ 테이블당 (0<=count<=1) 개 ]
+          하나의 테이블에 오직 '하나'만 존재하며 자동으로 INDEX 
+	  가 부여되는, 하나의 ROW 데이터를 대표하는 '대표 키'
+	
+       2) FOREIGN KEY (참조키/외래키) [ 테이블당 (0<=count<=n) 개 ]
+          부모 테이블의 'PK/UK'를 참조하는 키 
+
+       3) UNIQUE KEY (유일키) [ 테이블당 (0<=count<=n) 개 ]
+          PK가 아니더라도 컬럼의 모든 값이 유일해야 하는 경우 
+	  에 사용되는 제약조건이다.
+	  즉, 중복데이터를 허용하지 않는 컬럼에 부여하는 키
+
+	  cf) PK와 차이점 
+	  첫째, NULL 을 입력할 수 있다.
+          둘째, 하나의 테이블에 여러개의 유일키 생성 가능 
+
+       4) CHECK 
+          '조건'에 맞는 데이터만 입력되도록 조건을 부여한 제약조건 
+
+	  cf) 위의 '조건'이란 ? 
+	    - 데이터 값의 범위
+	    - 특정 패턴 숫자 
+	    - 문자값 설정
+	    ... 
+
+       5) NOT NULL 
+          NULL 이 입력되어서는 안되는 컬럼에 부여하는 제약조건으로 
+	  'COLUMN-LEVEL'으로만 부여할 수 있는 제약 조건
+
+	  cf1) PK는 not null 포함 
+	  cf2) default 는 제약조건이 아님 
+	  cf3) not null 조건도 constraint_type 이 'C'로 표현됨 
+
+   (3) LEVEL 기준 제약조건 부여방법 ( ***** )
+      1) COLUMN-LEVEL 
+         -> 하나의 제약조건을 부여할 때 사용하며 
+	    '5가지'를 모두 부여할 수 있음 
+
+	  ex) const1.sql (이름X), const2.sql(이름O) 
+	 
+
+      2) TABLE-LEVEL 
+         -> 하나의 이상의 컬럼에 여러개의 제약조건을 부여할 때 
+	    사용함 ( not null 불가 )
