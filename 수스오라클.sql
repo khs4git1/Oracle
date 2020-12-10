@@ -1462,3 +1462,98 @@
          -> '2개 이상의 테이블'로 생성되는 뷰 
 
 12. SEQUENCE ( 일련번호 ) 
+   (1) 설명 
+      연속적인 숫자값을 자동으로 증감시켜 발생시키는 객체(Object) 
+      즉, 시퀀스는 생성한 후, 호출만하면 연속적으로 번호를 
+      (oracle 에서) 증가/감소시켜 제공해 줌 
+
+   (2) 문법 
+      create sequence 시퀀스명 
+        [ increment by N ]
+	[ start with N ]
+	[ maxvalue N | nomaxvalue ]
+	[ minvalue N | nominvalue ]
+	[ cycle | nocycle ]
+	[ cache | nocache ]
+
+   (3) 생성
+       SQL> create sequence MYSEQ increment by 1 start with 1 nocache; 
+       SQL> desc seq
+       SQL> select SEQUENCE_NAME, INCREMENT_BY, MAX_VALUE, MIN_VALUE from seq;
+
+   (4) 사용 
+       1) NEXTVAL 
+          SQL> select MYSEQ.NEXTVAL from DUAL;
+
+       2) CURRVAL 
+          SQL> select MYSEQ.CURRVAL from DUAL;
+
+	  cf) 생성 후 적어도 한번은 NEXTVAL을 호출해야 시퀀스값이 할당됨 
+
+   (5) 삭제 
+       SQL> drop sequence MYSEQ;
+
+[ PART 4 - 관리 ]
+1. 계정
+   (1) 생성 
+      1) 만들기 
+         SQL> conn system/java1019
+	 SQL> create user TEST1 identified by JAVA;
+
+      2) 접근 
+         ERR> conn TEST1/JAVA
+	 SQL> grant CONNECT, RESOURCE to TEST1; -- CREATE VIEW 
+	 SQL> conn TEST1/JAVA
+
+      3) 확인 
+         SQL> desc dba_users
+	 SQL> select USERNAME, PASSWORD, DEFAULT_TABLESPACE from dba_users 
+	      where USERNAME='TEST1';
+
+	   cf) select USERNAME, PASSWORD, DEFAULT_TABLESPACE from dba_users 
+	      where USERNAME='SCOTT';
+
+   (2) 수정 
+       1) 접속 
+         SQL> conn system/java1019
+
+       2) 비번수정 
+	 SQL> alter user TEST1 identified by JAVAC;
+	
+       3) 확인 
+         SQL> conn TEST1/JAVAC
+	
+   (3) 삭제 
+       1) 접속 
+         SQL> conn system/java1019
+
+       2) 삭제 
+         SQL> drop user TEST1; -- 테이블이 없는 경우에만 삭제됨 
+	 SQL> drop user TEST1 CASCADE; -- 테이블 유무에 관계없이 삭제됨 
+
+
+       cf) 권한 제거 
+         SQL> conn system/java1019
+	 SQL> revoke CREATE VIEW from TEST1;
+
+        
+       cf1) 오라클 참고 사이트 => http://www.gurubee.net/
+       cf2) 더 많은 권한들을 확인 
+            select ROLE, PASSWORD_REQUIRED, AUTHENTICATION_TYPE 
+	          from dba_roles order by ROLE;
+
+2. 백업 및 복구 ( 도스 컨솔 )
+   (1) 백업 
+       1) 전체 데이터베이스 ( Full Level Export )
+       2) 특정 사용자 ( User Level Export ) *****
+          C:\>exp scott/tiger file='C:\~\dump1.dmp' 
+	  또는 
+	  C:\>exp userid=system/java1019 owner=scott file='C:\~\dump2.dmp'
+       3) 특정 테이블 ( Table Level Export )
+          
+   (2) 복구 
+       1) 전체 데이터베이스 ( Full Level Import )
+       2) 특정 사용자 ( User Level Import ) *****
+          C:\>imp userid=system/java1019 file='C:\SOO\Git\Oracle\3_BACKUP\dump1.dmp' 
+	     fromuser=scott touser=SCOTT2
+       3) 선택된 테이블 ( Table Level Import ) 
