@@ -1557,3 +1557,9 @@
           C:\>imp userid=system/java1019 file='C:\SOO\Git\Oracle\3_BACKUP\dump1.dmp' 
 	     fromuser=scott touser=SCOTT2
        3) 선택된 테이블 ( Table Level Import ) 
+
+     
+[ PART 5 - PL-SQL ] 
+1. Procedure : "작업처리순서"
+
+2. Trigger : "DML방아쇠"
