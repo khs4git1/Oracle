@@ -1735,11 +1735,103 @@
           1> 정의: 부모의 PK컬럼이 자식의 'PK컬럼'으로 전이 되는 것
 	  2> 무조건 No nulls 
 
+	  ex) alter table EMP2 drop constraint PK_EMP2;
+	      alter table EMP2 add constraint PK_EMP22 primary key(EMPNO, DEPTNO);
+
        <2> 비식별관계 ( Non-Identifying )
           1> 정의: 부모의 PK컬럼이 자식의 '일반컬럼'이 전이 되는 것
 	  2> 2개중 택일 
 	     - Null Allowed 
 	     - No nulls
 
-cf) 모델링툴 다운로드 URL 
-http://ko.exerd.com/#download-section
+	cf)  모델링툴 다운로드 URL 
+	http://ko.exerd.com/#download-section
+
+
+3. 단계( step )
+  (1) 솔루션(solution) 제작 순서 
+     1) 현실세계의 '업무프로세스 분석' / '요구 분석'
+     2) '개'념적 모델링 ( ppt, txt )
+     3) '논'리적 모델링 ( diagram with tool ) 
+     4) '물'리적 모델링 ( diagram with tool ) 
+     5) DDL 생성  
+     6) 구현( 디자인 + 프로그램 )
+     7) 테스팅 
+     8) 서비스(유지보수)  
+     
+  (2) DB 모델링 순서 
+     1) 업무 분석표
+
+     2) 개념적 모델링 ( '선택성.ppt' 참고 )
+        '엔티티, 속성, 관계' 를 추출해서 개념적 ERD를 정의하는 단계 
+
+	ex1) 학생/과목/등록 - ( N:N 관계 예 )
+	  학생 [학번(PK), 이름, 주소, 연락처]
+	    | 
+	  등록 [등록번호(PK), 학번(FK), 과목번호(FK), 점수]
+	    | 
+	  과목 [과목번호(PK), 과목명, 커리큘럼]
+
+	ex2) 부서/사원 - ( 1:N 관계 예 )
+	  부서[부서코드(PK), 부서명, 위치]
+	    | 
+	  사원[사번(PK), 이름, 주소, 입사일, 성별, 부서코드(FK) ]
+	
+     3) 논리적 모델링
+        개념적 모델링단계에서 정의된 ERD를 매핑룰을 적용해서 
+	스키마를 생성하고 정규화까지를 포함하는 단계 
+	(스키마는 개체들의 관계 제약조건등의 명세를 의미)
+    
+        ex) ERD로 테스팅..
+    
+     4) 물리적 모델링 
+        논리적 모델링에서 작성된 내용을 토대로 
+	'DBMS를 결정', '컬럼타입과 사이즈'를 정의, 각 종 '제약조건'
+	(CHECK, NOT NULL, PK, FK, UNIQUE), 인덱스등을 정의하여
+	'역정규화'까지를 포함하는 단계 
+
+        ex) ERD로 테스팅..
+   
+     5) SQL/PLSQL을 작성한다. 
+       <1> create.sql 
+       <2> drop.sql 
+       <3> insert.sql 
+       <4> select.sql ( 다양한 경우의 검색경우를 check!! ) 
+
+ (3) ERD의 관계 표기 
+     1) 표기 
+       <1> 실선 : 식별관계 (Identifying Type)
+          (부모 테이블의 PK가 자식테이블의 FK/PK가 되는 경우)
+       <2> 점선 : 비식별관계 (Non-Identifying Type)
+          (부모 테이블의 PK가 자식테이블의 일반컬럼 FK가되는 경우)
+       <3> O : Optional - 선택 ( 0개가 될 수 있다.)
+       <4> | : Mandatory - 필수 ( 1개가 있어야 된다. )
+       <5> 문어다리 : Many (여러개가 될 수 있다.)
+       <6> - : Exactly ( 오직 정해진 개수만 될 수 있다. )
+
+       cf) 선택성.ppt 참고 할 것!!
+
+     2) 관계 구분  
+       <1> Cardinality (자식테이블측)
+         1> Zero, (One or) More
+	 2> One or More 
+	 3> Zero or One 
+	 4> Exactly 
+
+       <2> Relationship Type (자식테이블측)
+         1> Identifying (식별)
+	 2> Non-Identifying (비식별)
+
+  (4) ERD로 해야 할 모델링 
+     1) 논리적 모델링 
+       DBMS가 정해지지 않은 상태에서의 ERD  
+
+     2) 물리적 모델링 
+       DBMS이 정해져서 해당 DBMS에 적합한 테이블이름과 
+       컬럼, 데이터타입/사이즈를 모두 영문으로 바꾼 ERD
+
+  (5) DDL 작성 
+     1) forward Engineering 
+        -> 가독성 떨러짐 
+     2) 코드로 직접 작성 
+        -> 이걸로 하자
