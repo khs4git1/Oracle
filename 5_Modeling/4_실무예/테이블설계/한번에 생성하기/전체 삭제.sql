@@ -57,7 +57,7 @@ drop sequence humember_seq;
 
 
 
-
+purge recyclebin;
 
 
 
